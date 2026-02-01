@@ -152,7 +152,11 @@ fi
 
 DOMAIN="$1"
 SERVICE="$2"
-SERVICE_DATA="${3:-{}}"
+if [[ $# -ge 3 ]]; then
+    SERVICE_DATA="$3"
+else
+    SERVICE_DATA="{}"
+fi
 
 # Validate JSON if provided
 if ! echo "$SERVICE_DATA" | jq empty 2>/dev/null; then
