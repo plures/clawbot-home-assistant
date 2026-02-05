@@ -4,7 +4,7 @@
 [![CI](https://github.com/plures/clawbot-home-assistant/actions/workflows/ci.yml/badge.svg)](https://github.com/plures/clawbot-home-assistant/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Clawbot integration for Home Assistant (dogfooding + automations). Read-only by default with gated write operations.
+Clawbot integration for Home Assistant (dogfooding + automations). Read-only by default with explicitly gated write operations.
 
 ---
 
@@ -12,15 +12,20 @@ Clawbot integration for Home Assistant (dogfooding + automations). Read-only by 
 
 ## Overview
 
-This repo contains scripts and docs intended to be used as an OpenClaw skill/integration for Home Assistant:
+This repository implements an OpenClaw/Home Assistant REST integration focused on safety:
 
-- `scripts/ha_probe.sh`: connectivity + config probe (read-only)
-- `scripts/ha_list_entities.sh`: list entities/states (read-only)
-- `scripts/ha_call_service.sh`: call HA services (write), **requires explicit `--intent`**
+- Read-only scripts for probing and listing entities
+- Write operations require an explicit `--intent` gate
+- Security guidance for token handling
+
+Scripts:
+- `scripts/ha_probe.sh` (read-only)
+- `scripts/ha_list_entities.sh` (read-only)
+- `scripts/ha_call_service.sh` (write; requires `--intent`)
 
 ## Install
 
-Dependencies:
+Prereqs:
 
 - `curl`
 - `jq`
@@ -31,7 +36,7 @@ Dependencies:
 
 ```bash
 cp .env.example .env
-# Edit .env with your Home Assistant URL and long-lived access token
+# Edit .env with your Home Assistant URL + long-lived access token
 source .env
 ./scripts/ha_probe.sh
 ```
@@ -39,10 +44,8 @@ source .env
 ### Examples
 
 ```bash
-# List all lights
 ./scripts/ha_list_entities.sh --domain light
 
-# Turn on a light (write operation; requires explicit intent)
 ./scripts/ha_call_service.sh --intent light turn_on '{"entity_id": "light.living_room"}'
 ```
 
@@ -57,6 +60,7 @@ source .env
 Docs:
 - [docs/README.md](docs/README.md) (usage)
 - [docs/SECURITY.md](docs/SECURITY.md) (token handling)
+- [QUICKSTART.md](QUICKSTART.md) (3-minute setup)
 - [docs/PLAN.md](docs/PLAN.md) (plan/roadmap)
 
 ## License
