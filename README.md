@@ -41,18 +41,40 @@ source .env
 ./scripts/ha_probe.sh
 ```
 
+### Security & permission gating
+
+- `ha_probe.sh` / `ha_list_entities.sh` only perform GET requests.
+- `ha_call_service.sh` requires explicit opt-in:
+  1) `--intent` flag
+  2) confirmation prompt (bypass with `--yes`)
+  3) `--dry-run` support to preview the call
+
+Gate is enforced inside `scripts/ha_call_service.sh` before any API call is made.
+
+See [docs/SECURITY.md](docs/SECURITY.md).
+
 ### Examples
 
 ```bash
+# Read-only operations
+./scripts/ha_probe.sh
 ./scripts/ha_list_entities.sh --domain light
 
+# Write operation (explicit intent)
 ./scripts/ha_call_service.sh --intent light turn_on '{"entity_id": "light.living_room"}'
+
+# Preview a write (no side effects)
+./scripts/ha_call_service.sh --intent --dry-run light turn_on '{"entity_id": "light.living_room"}'
 ```
 
 ### Tests
 
 ```bash
+# Run all tests
 ./tests/run_tests.sh
+
+# Run specific test
+./tests/test_permission_gate.sh
 ```
 
 ## Contributing
