@@ -159,9 +159,19 @@ else
 fi
 
 # Validate JSON if provided
-if ! echo "$SERVICE_DATA" | jq empty 2>/dev/null; then
-    echo -e "${RED}Error: Invalid JSON in service_data${NC}" >&2
-    exit 1
+if command -v jq >/dev/null 2>&1; then
+    if ! echo "$SERVICE_DATA" | jq empty 2>/dev/null; then
+        echo -e "${RED}Error: Invalid JSON in service_data${NC}" >&2
+        exit 1
+    fi
+    SERVICE_DATA_PRETTY=$(echo "$SERVICE_DATA" | jq '.')
+else
+    # Fallback: use python for JSON validation/pretty-printing if jq isn't installed.
+    if ! python3 -c 'import json,sys; json.load(sys.stdin)' <<<"$SERVICE_DATA" 2>/dev/null; then
+        echo -e "${RED}Error: Invalid JSON in service_data (install jq for better diagnostics)${NC}" >&2
+        exit 1
+    fi
+    SERVICE_DATA_PRETTY=$(python3 -c 'import json,sys; print(json.dumps(json.load(sys.stdin), indent=2, sort_keys=True))' <<<"$SERVICE_DATA")
 fi
 
 echo -e "${YELLOW}=== Home Assistant Service Call ===${NC}"
@@ -169,7 +179,7 @@ echo "URL: $HA_URL"
 echo "Domain: $DOMAIN"
 echo "Service: $SERVICE"
 echo "Service Data:"
-echo "$SERVICE_DATA" | jq '.'
+echo "$SERVICE_DATA_PRETTY"
 echo ""
 
 if [[ $DRY_RUN -eq 1 ]]; then
